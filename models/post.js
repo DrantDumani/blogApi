@@ -8,6 +8,13 @@ const PostSchema = new Schema({
   author: { type: Schema.Types.ObjectId, ref: "User" },
   timestamp: { type: Date, default: Date.now },
   likes: { type: Array, default: [] },
+  likes_count: { type: Number, default: 0 },
+  tags: { type: Array, default: [] },
+});
+
+PostSchema.pre("save", function (next) {
+  this.tags = this.tags.map((tag) => tag.toLowerCase());
+  next();
 });
 
 PostSchema.virtual("mm-dd-yyyy").get(function () {
