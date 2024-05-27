@@ -17,3 +17,17 @@ exports.postValidator = () => {
     body("tags.*", "Tags must be strings").optional().isString(),
   ];
 };
+
+exports.checkQueries = (req, res, next) => {
+  req.query.sortBy =
+    req.query.sortBy === "likes_count" || req.query.sortBy === "timestamp"
+      ? req.query.sortBy
+      : "timestamp";
+  req.query.direction =
+    req.query.direction === "-1" || req.query.direction === "1"
+      ? req.query.direction
+      : "-1";
+  req.query.tag =
+    typeof req.query.tag === "string" ? req.query.tag.toLowerCase() : "";
+  next();
+};
