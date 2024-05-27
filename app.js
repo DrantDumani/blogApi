@@ -5,6 +5,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 
 const postRouter = require("./routes/postRouter");
+const userRouter = require("./routes/userRouter");
 
 const mongoURI = process.env.PRODUCTION_DB || process.env.DEVELOPMENT_DB;
 const port = process.env.PORT;
@@ -21,6 +22,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use("/users", userRouter);
 app.use("/posts", postRouter);
 
 app.use((req, res, next) => {
