@@ -7,9 +7,10 @@ const PostSchema = new Schema({
   content: { type: String, required: true, minLength: 3 },
   author: { type: Schema.Types.ObjectId, ref: "User" },
   timestamp: { type: Date, default: Date.now },
-  likes: { type: Array, default: [] },
+  edited_at: { type: Date },
+  likes: { type: [String], default: [] },
   likes_count: { type: Number, default: 0 },
-  tags: { type: Array, default: [] },
+  tags: { type: [String], default: [] },
 });
 
 PostSchema.pre("save", function (next) {
