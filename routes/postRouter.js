@@ -20,6 +20,8 @@ router.get("/", postController.get_three_posts);
 
 router.get("/all", postController.get_all_posts);
 
+router.post("/new", postController.create_post);
+
 router.get("/:postId", postController.get_single_post);
 
 module.exports = router;
