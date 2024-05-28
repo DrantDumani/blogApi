@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 const postRouter = require("./routes/postRouter");
 const userRouter = require("./routes/userRouter");
+const commentRouter = require("./routes/commentRouter");
 
 const mongoURI = process.env.PRODUCTION_DB || process.env.DEVELOPMENT_DB;
 const port = process.env.PORT;
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
+app.use("/comments", commentRouter);
 
 app.use((req, res, next) => {
   next(createError(404));

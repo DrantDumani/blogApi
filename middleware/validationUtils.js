@@ -14,7 +14,7 @@ exports.postValidator = () => {
       .trim()
       .isLength({ min: 3 }),
     body("tags", "Tags must be an array of strings").isArray(),
-    body("tags.*", "Tags must be strings").optional().isString(),
+    body("tags.*", "Tags must be strings").optional().isString().trim(),
   ];
 };
 
@@ -23,6 +23,7 @@ exports.userValidator = () => {
     body("username", "Name should be at least 3 characters long")
       .isString()
       .bail()
+      .trim()
       .isLength({ min: 3 }),
     body("email", "Invalid email").isEmail(),
     body("password", "Password must be at least 8 characters")
@@ -36,6 +37,14 @@ exports.userValidator = () => {
         return value === req.body.password;
       }),
   ];
+};
+
+exports.commentValidator = () => {
+  return body("content", "Comment must be between 3 and 400 characters")
+    .isString()
+    .bail()
+    .trim()
+    .isLength({ min: 3, max: 400 });
 };
 
 exports.checkQueries = (req, res, next) => {
