@@ -18,6 +18,26 @@ exports.postValidator = () => {
   ];
 };
 
+exports.userValidator = () => {
+  return [
+    body("username", "Name should be at least 3 characters long")
+      .isString()
+      .bail()
+      .isLength({ min: 3 }),
+    body("email", "Invalid email").isEmail(),
+    body("password", "Password must be at least 8 characters")
+      .isString()
+      .bail()
+      .isLength({ min: 8 }),
+    body("confirmPw", "Passwords must match")
+      .isString()
+      .bail()
+      .custom((value, { req }) => {
+        return value === req.body.password;
+      }),
+  ];
+};
+
 exports.checkQueries = (req, res, next) => {
   req.query.sortBy =
     req.query.sortBy === "likes_count" || req.query.sortBy === "timestamp"
