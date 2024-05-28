@@ -8,4 +8,6 @@ router.post("/login", userController.log_in);
 
 router.post("/loginAuthor", userController.log_in_author);
 
+router.delete("/:userId", userController.ban_user);
+
 module.exports = router;
