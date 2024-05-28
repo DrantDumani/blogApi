@@ -61,10 +61,11 @@ exports.delete_comment = [
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
-      const deleted = await Comment.findOneAndDelete({
-        _id: req.params.commentId,
-        author: req.user.id,
-      }).exec();
+      const filterOpts = req.user.isAdmin
+        ? { _id: req.params.commentId }
+        : { _id: req.params.commentId, author: req.user.id };
+
+      const deleted = await Comment.findOneAndDelete(filterOpts).exec();
 
       if (deleted) return res.json("success");
       else return res.status(401).json("failure");
