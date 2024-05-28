@@ -122,15 +122,14 @@ exports.like_post = [
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
-      const [post, user] = await Promise.all([
-        Post.findById(req.params.postId, "likes likes_count").exec(),
-        User.findById(req.params.userId, "username").exec(),
-      ]);
-      const userId = user._id.toString();
+      const post = await Post.findById(
+        req.params.postId,
+        "likes likes_count"
+      ).exec();
 
-      if (!post.likes.includes(userId)) {
+      if (!post.likes.includes(req.user.id)) {
         post.likes_count += 1;
-        post.likes.push(userId);
+        post.likes.push(req.user.id);
 
         const liked = await Post.findByIdAndUpdate(
           req.params.postId,
@@ -153,19 +152,17 @@ exports.unlike_post = [
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
-      const [post, user] = await Promise.all([
-        Post.findById(req.params.postId, "likes likes_count").exec(),
-        User.findById(req.params.userId, "username").exec(),
-      ]);
-      const userId = user._id.toString();
-      const idIndex = post.likes.indexOf(userId);
+      const post = await Post.findById(
+        req.params.postId,
+        "likes likes_count"
+      ).exec();
+
+      const idIndex = post.likes.indexOf(req.user.id);
 
       if (idIndex > -1) {
         post.likes_count -= 1;
-        [post.likes[idIndex], post.likes[post.likes.length - 1]] = [
-          post.likes[post.likes.length - 1],
-          post.likes[idIndex],
-        ];
+        post.likes[idIndex] = post.likes[post.likes.length - 1];
+
         post.likes.pop();
 
         const liked = await Post.findByIdAndUpdate(

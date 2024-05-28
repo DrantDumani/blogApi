@@ -15,8 +15,8 @@ router.delete("/:postId", postController.delete_post);
 
 router.get("/:postId", postController.get_single_post);
 
-router.put("/:postId/:userId/like", postController.like_post);
+router.put("/:postId/like", postController.like_post);
 
-router.delete("/:postId/:userId/like", postController.unlike_post);
+router.delete("/:postId/like", postController.unlike_post);
 
 module.exports = router;
