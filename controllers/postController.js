@@ -79,22 +79,15 @@ exports.edit_post = [
       if (!errors.isEmpty()) {
         return res.status(403).json("Invalid format");
       } else {
-        const update = {
-          title: req.body.title,
-          content: req.body.content,
-          tags: req.body.tags,
-          edited_at: Date.now(),
-        };
+        const post = await Post.findById(req.params.postId).exec();
 
-        if (req.body.subTitle) update.subTitle = req.body.subTitle;
+        post.title = req.body.title;
+        post.content = req.body.content;
+        post.tags = req.body.tags;
+        post.edited_at = Date.now();
+        if (req.body.subTitle) post.subTitle = req.body.subTitle;
 
-        const updatedPost = await Post.findByIdAndUpdate(
-          req.params.postId,
-          { $set: update },
-          {
-            new: true,
-          }
-        ).exec();
+        const updatedPost = await post.save();
         return res.json(updatedPost);
       }
     } catch (err) {
