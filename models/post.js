@@ -11,6 +11,7 @@ const PostSchema = new Schema({
   likes: { type: [String], default: [] },
   likes_count: { type: Number, default: 0 },
   tags: { type: [String], default: [] },
+  published: { type: Boolean, default: false },
 });
 
 PostSchema.pre("save", function (next) {

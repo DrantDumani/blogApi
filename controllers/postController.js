@@ -5,27 +5,28 @@ const middleware = require("../middleware/middleUtils");
 const validation = require("../middleware/validationUtils");
 const { validationResult } = require("express-validator");
 
-exports.get_three_posts = async (req, res, next) => {
-  try {
-    const posts = await Post.find({}, "title subTitle timestamp likes_count")
-      .sort({ [req.query.sortBy]: Number(req.query.direction) })
-      .limit(3)
-      .exec();
-    res.json(posts);
-  } catch (err) {
-    return next(err);
-  }
-};
-
 exports.get_all_posts = async (req, res, next) => {
   try {
-    const filter = req.query.tag ? { tags: req.query.tag } : {};
+    passport.authenticate("jwt", { session: false }, (err, user) => {
+      if (err) return next(err);
+      req.user = user;
+    })(req, res, next);
+    const filter = {};
+    if (req.query.tag) filter.tags = req.query.tag;
+
+    if (!req.user.isAdmin) req.query.published = true;
+
+    if (req.query.published !== "" && req.query.published !== undefined) {
+      filter.published = req.query.published;
+    }
     const allPosts = await Post.find(
       filter,
       "title subTitle timestamp likes_count"
     )
       .sort({ [req.query.sortBy]: Number(req.query.direction) })
+      .limit(Number(req.query.limit))
       .exec();
+
     res.json(allPosts);
   } catch (err) {
     return next(err);
@@ -34,7 +35,11 @@ exports.get_all_posts = async (req, res, next) => {
 
 exports.get_single_post = async (req, res, next) => {
   try {
-    const post = await Post.findById(req.params.postId).exec();
+    const filter = { _id: req.params.postId };
+    if (!req.user || !req.user.isAdmin) {
+      filter.published = true;
+    }
+    const post = await Post.findOne(req.params.postId).exec();
     res.json(post);
   } catch (err) {
     return next(err);
@@ -59,6 +64,7 @@ exports.create_post = [
         content: req.body.content,
         author: req.user.id,
         tags: req.body.tags,
+        published: req.body.published,
       });
 
       await post.save();
@@ -85,6 +91,7 @@ exports.edit_post = [
         post.content = req.body.content;
         post.tags = req.body.tags;
         post.edited_at = Date.now();
+        post.published = req.body.published;
         if (req.body.subTitle) post.subTitle = req.body.subTitle;
 
         const updatedPost = await post.save();

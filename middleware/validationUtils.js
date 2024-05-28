@@ -15,6 +15,7 @@ exports.postValidator = () => {
       .isLength({ min: 3 }),
     body("tags", "Tags must be an array of strings").isArray(),
     body("tags.*", "Tags must be strings").optional().isString().trim(),
+    body("published").isBoolean(),
   ];
 };
 
@@ -58,5 +59,10 @@ exports.checkQueries = (req, res, next) => {
       : "-1";
   req.query.tag =
     typeof req.query.tag === "string" ? req.query.tag.toLowerCase() : "";
+
+  req.query.limit = Number(req.query.limit) ? req.query.limit : "0";
+
+  if (req.query.published === "false") req.query.published = false;
+  else if (req.query.published) req.query.published = true;
   next();
 };

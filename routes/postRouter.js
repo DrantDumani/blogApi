@@ -3,9 +3,7 @@ const router = express.Router();
 const postController = require("../controllers/postController");
 const validation = require("../middleware/validationUtils");
 
-router.get("/", validation.checkQueries, postController.get_three_posts);
-
-router.get("/all", validation.checkQueries, postController.get_all_posts);
+router.get("/", validation.checkQueries, postController.get_all_posts);
 
 router.post("/", postController.create_post);
 
