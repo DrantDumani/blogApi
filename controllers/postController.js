@@ -87,10 +87,16 @@ exports.edit_post = [
       } else {
         const post = await Post.findById(req.params.postId).exec();
 
+        if (req.body.published && !post.published) {
+          post.timestamp = Date.now();
+          delete post.edited_at;
+        } else if (!req.body.published && post.published) {
+          post.edited_at = Date.now();
+        }
+
         post.title = req.body.title;
         post.content = req.body.content;
         post.tags = req.body.tags;
-        post.edited_at = Date.now();
         post.published = req.body.published;
         if (req.body.subTitle) post.subTitle = req.body.subTitle;
 
