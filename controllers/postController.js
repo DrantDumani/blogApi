@@ -146,52 +146,21 @@ exports.like_post = [
       if (!post.likes.includes(req.user.id)) {
         post.likes_count += 1;
         post.likes.push(req.user.id);
-
-        const liked = await Post.findByIdAndUpdate(
-          req.params.postId,
-          {
-            $set: { likes: post.likes, likes_count: post.likes_count },
-          },
-          { new: true }
-        ).exec();
-        return res.json({ likes_count: liked.likes_count });
-      }
-
-      return res.status(403).json("User has already liked this post");
-    } catch (err) {
-      return next(err);
-    }
-  },
-];
-
-exports.unlike_post = [
-  passport.authenticate("jwt", { session: false }),
-  async (req, res, next) => {
-    try {
-      const post = await Post.findById(
-        req.params.postId,
-        "likes likes_count"
-      ).exec();
-
-      const idIndex = post.likes.indexOf(req.user.id);
-
-      if (idIndex > -1) {
+      } else {
+        const idIndex = post.likes.indexOf(req.user.id);
         post.likes_count -= 1;
         post.likes[idIndex] = post.likes[post.likes.length - 1];
 
         post.likes.pop();
-
-        const liked = await Post.findByIdAndUpdate(
-          req.params.postId,
-          {
-            $set: { likes: post.likes, likes_count: post.likes_count },
-          },
-          { new: true }
-        ).exec();
-        return res.json({ likes_count: liked.likes_count });
       }
-
-      return res.status(403).json("User cannot remove a like from this post");
+      const updatedLikes = await Post.findByIdAndUpdate(
+        req.params.postId,
+        {
+          $set: { likes: post.likes, likes_count: post.likes_count },
+        },
+        { new: true }
+      ).exec();
+      return res.json({ likes_count: updatedLikes.likes_count });
     } catch (err) {
       return next(err);
     }

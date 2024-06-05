@@ -15,6 +15,4 @@ router.get("/:postId", postController.get_single_post);
 
 router.put("/:postId/like", postController.like_post);
 
-router.delete("/:postId/like", postController.unlike_post);
-
 module.exports = router;
