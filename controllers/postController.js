@@ -21,13 +21,13 @@ exports.get_all_posts = async (req, res, next) => {
     }
     const allPosts = await Post.find(
       filter,
-      "title subTitle timestamp likes_count"
+      "title subTitle timestamp likes_count published"
     )
       .sort({ [req.query.sortBy]: Number(req.query.direction) })
       .limit(Number(req.query.limit))
       .exec();
 
-    res.json(allPosts);
+    res.json({ posts: allPosts });
   } catch (err) {
     return next(err);
   }
@@ -35,13 +35,19 @@ exports.get_all_posts = async (req, res, next) => {
 
 exports.get_single_post = async (req, res, next) => {
   try {
+    passport.authenticate("jwt", { session: false }, (err, user) => {
+      if (err) return next(err);
+      req.user = user;
+    })(req, res, next);
     const filter = { _id: req.params.postId };
-    if (!req.user || !req.user.isAdmin) {
+    if (!req.user && !req.user.isAdmin) {
       filter.published = true;
     }
-    const post = await Post.findOne(req.params.postId).exec();
-    res.json(post);
+    const post = await Post.findOne(filter).exec();
+    if (post) return res.json(post);
+    else return res.status(404).json("Not found");
   } catch (err) {
+    console.log(err);
     return next(err);
   }
 };
@@ -54,6 +60,7 @@ exports.create_post = [
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
+      console.log(errors);
       if (!errors.isEmpty()) {
         return res.status(403).json("Invalid format");
       }
@@ -87,10 +94,12 @@ exports.edit_post = [
       } else {
         const post = await Post.findById(req.params.postId).exec();
 
+        if (!post) return res.status(404).json("Post not found");
+
         if (req.body.published && !post.published) {
           post.timestamp = Date.now();
           delete post.edited_at;
-        } else if (!req.body.published && post.published) {
+        } else if (req.body.published && post.published) {
           post.edited_at = Date.now();
         }
 
@@ -116,8 +125,9 @@ exports.delete_post = [
     try {
       const deletedPost = await Post.findByIdAndDelete(req.params.postId);
       if (deletedPost) {
-        return res.json("Success");
+        return res.json(true);
       }
+      return res.json(false);
     } catch (err) {
       return next(err);
     }

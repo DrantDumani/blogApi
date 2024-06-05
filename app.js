@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const createError = require("http-errors");
 const logger = require("morgan");
 require("dotenv").config();
@@ -22,6 +23,7 @@ const app = express();
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 
 app.use("/users", userRouter);
 app.use("/posts", postRouter);

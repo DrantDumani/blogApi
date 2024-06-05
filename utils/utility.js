@@ -13,9 +13,9 @@ exports.sign_jwt_token = (req, res, user) => {
     jwt.sign(
       payload,
       process.env.SECRET,
-      { expiresIn: "7 days" },
+      { expiresIn: "2 days" },
       (err, token) => {
-        return res.json(token);
+        return res.json({ token });
       }
     );
   });
