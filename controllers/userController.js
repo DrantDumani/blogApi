@@ -15,7 +15,7 @@ exports.sign_up = [
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
-        return res.status(403).json("Invalid user data");
+        return res.status(403).json({ errs: errors.mapped() });
       }
 
       const [dupeEmail, dupeName] = await Promise.all([
@@ -28,7 +28,7 @@ exports.sign_up = [
           dupeName: dupeName ? "Name already in use" : undefined,
           dupeEmail: dupeEmail ? "Email already in use" : undefined,
         };
-        return res.status(403).json(dupeErrors);
+        return res.status(403).json({ errs: dupeErrors });
       }
       const user = new User({
         username: req.body.username,
@@ -48,11 +48,6 @@ exports.log_in = [middleware.checkLoggedIn, middleware.localUserAuth];
 
 exports.log_in_author = [middleware.checkLoggedIn, middleware.localAdminAuth];
 
-// confirm that the user is an admin
-// then ban the user by removing their account
-// you'll need to delete their comments too
-// and delete their likes
-// can't delete jwt though. Just make them short lived. Next time they log in, they get nothing
 exports.ban_user = [
   passport.authenticate("jwt", { session: false }),
   middleware.checkIsAdmin,

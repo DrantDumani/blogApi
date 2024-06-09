@@ -18,7 +18,7 @@ exports.checkIsAdmin = (req, res, next) => {
 exports.localUserAuth = (req, res, next) => {
   passport.authenticate("local", { session: false }, (err, user) => {
     if (err || !user) {
-      return res.status(401).json("Invalid Credentials");
+      return res.status(401).json({ err: "Invalid Credentials" });
     } else {
       utility.sign_jwt_token(req, res, user, next);
     }
