@@ -15,7 +15,12 @@ exports.sign_jwt_token = (req, res, user) => {
       process.env.SECRET,
       { expiresIn: "2 days" },
       (err, token) => {
-        return res.json({ token });
+        return res.json({
+          token,
+          id: payload.id,
+          username: payload.username,
+          isAdmin: payload.isAdmin,
+        });
       }
     );
   });
