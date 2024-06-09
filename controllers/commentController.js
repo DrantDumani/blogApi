@@ -5,7 +5,11 @@ const validation = require("../middleware/validationUtils");
 
 exports.get_all_comments = async (req, res, next) => {
   try {
-    const allComments = await Comment.find({ blogPost: req.params.postId })
+    const allComments = await Comment.find(
+      { blogPost: req.params.postId },
+      { blogPost: 0 }
+    )
+      .populate({ path: "author", select: "username" })
       .sort({ timestamp: -1 })
       .exec();
     res.json(allComments);
