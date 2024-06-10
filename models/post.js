@@ -19,8 +19,4 @@ PostSchema.pre("save", function (next) {
   next();
 });
 
-PostSchema.virtual("mm-dd-yyyy").get(function () {
-  // return date in the correct format
-});
-
 module.exports = mongoose.model("Post", PostSchema);

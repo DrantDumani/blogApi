@@ -8,8 +8,4 @@ const CommentSchema = new Schema({
   blogPost: { type: Schema.Types.ObjectId, ref: "Post" },
 });
 
-CommentSchema.virtual("humanDate").get(function () {
-  // add function later
-});
-
 module.exports = mongoose.model("Comment", CommentSchema);
