@@ -2,6 +2,7 @@ const Comment = require("../models/comment");
 const Post = require("../models/post");
 const passport = require("../passportConfig");
 const validation = require("../middleware/validationUtils");
+const { validationResult } = require("express-validator");
 
 exports.get_all_comments = async (req, res, next) => {
   try {
@@ -23,6 +24,11 @@ exports.post_new_comment = [
   validation.commentValidator(),
   async (req, res, next) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(403).json({ err: "Unable to post comment" });
+      }
+
       const blogPost = await Post.findById(req.params.postId, "title");
       if (!blogPost) return res.status(401).json("Unauthorized action");
 
@@ -45,6 +51,11 @@ exports.edit_comment = [
   validation.commentValidator(),
   async (req, res, next) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(403).json({ err: "Unable to post comment" });
+      }
+
       const comment = await Comment.findOne({
         _id: req.params.commentId,
         author: req.user.id,
