@@ -37,7 +37,7 @@ app.use(
   cors({
     origin: [
       "https://almagorge-admin-portal.netlify.app",
-      "https://almagorge.netlify.app/",
+      "https://almagorge.netlify.app",
     ],
   })
 );
