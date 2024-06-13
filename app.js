@@ -33,7 +33,14 @@ app.use(helmet());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://almagorge-admin-portal.netlify.app",
+      "https://almagorge.netlify.app/",
+    ],
+  })
+);
 
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
