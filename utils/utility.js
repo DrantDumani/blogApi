@@ -4,10 +4,10 @@ exports.sign_jwt_token = (req, res, user) => {
   req.login(user, { session: false }, (err) => {
     if (err) return res.json("An error has occured");
     const payload = {
-      id: user._id,
+      id: user.id,
       username: user.username,
       email: user.email,
-      isAdmin: user.isAdmin,
+      role: user.role,
     };
 
     jwt.sign(
@@ -19,7 +19,7 @@ exports.sign_jwt_token = (req, res, user) => {
           token,
           id: payload.id,
           username: payload.username,
-          isAdmin: payload.isAdmin,
+          role: payload.role,
         });
       }
     );

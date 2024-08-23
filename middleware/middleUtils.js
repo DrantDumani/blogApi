@@ -11,7 +11,7 @@ exports.checkLoggedIn = (req, res, next) => {
 };
 
 exports.checkIsAdmin = (req, res, next) => {
-  if (!req.user.isAdmin) return res.status(401).send("Forbidden");
+  if (req.user.role !== "Super") return res.status(401).send("Forbidden");
   return next();
 };
 
