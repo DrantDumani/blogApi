@@ -30,6 +30,11 @@ exports.get_all_posts = async (req, res, next) => {
       include: {
         tags: true,
       },
+      orderBy: [
+        {
+          timestamp: "desc",
+        },
+      ],
     });
 
     res.json({ posts: allPosts });
