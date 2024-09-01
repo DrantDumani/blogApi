@@ -38,7 +38,7 @@ app.use(
     origin: [
       "https://almagorge-admin-portal.netlify.app",
       "https://almagorge.netlify.app",
-      "http://localhost",
+      "http://localhost:5173",
     ],
   })
 );
