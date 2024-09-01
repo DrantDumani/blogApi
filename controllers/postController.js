@@ -1,28 +1,86 @@
-const Post = require("../models/post");
-const User = require("../models/user");
 const passport = require("../passportConfig");
 const middleware = require("../middleware/middleUtils");
 const validation = require("../middleware/validationUtils");
 const { validationResult } = require("express-validator");
 const client = require("../prisma/client");
 
-exports.get_all_posts = async (req, res, next) => {
+exports.get_all_published_posts = async (req, res, next) => {
   try {
-    passport.authenticate("jwt", { session: false }, (err, user) => {
-      if (err) return next(err);
-      req.user = user;
-    })(req, res, next);
-    const filter = {};
+    const filter = { published: true };
     if (req.query.tag) {
       filter.tags = {
         some: { name: { mode: "insensitive", equals: req.query.tag } },
       };
     }
 
-    if (req.user.role !== "Super") req.query.published = true;
+    const allPosts = await client.posts.findMany({
+      where: filter,
+      include: {
+        tags: true,
+      },
+      orderBy: [
+        {
+          timestamp: "desc",
+        },
+      ],
+    });
 
-    if (req.query.published !== "" && req.query.published !== undefined) {
-      filter.published = req.query.published;
+    res.json({ posts: allPosts });
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
+};
+
+exports.get_authored_posts = async (req, res, next) => {
+  try {
+    passport.authenticate("jwt", { session: false }, (err, user) => {
+      if (err || (user.role !== "Author" && user.role !== "Super")) {
+        return res.status(403).json({ err: "Forbidden" });
+      }
+      req.user = user;
+    })(req, res, next);
+
+    const filter = { authorId: req.user.id };
+    if (req.query.tag) {
+      filter.tags = {
+        some: { name: { mode: "insensitive", equals: req.query.tag } },
+      };
+    }
+
+    const allPosts = await client.posts.findMany({
+      where: filter,
+      include: {
+        tags: true,
+      },
+      orderBy: [
+        {
+          timestamp: "desc",
+        },
+      ],
+    });
+
+    res.json({ posts: allPosts });
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
+};
+
+exports.get_all_posts = async (req, res, next) => {
+  try {
+    passport.authenticate("jwt", { session: false }, (err, user) => {
+      if (err || user.role !== "Super") {
+        return res.status(403).json({ err: "Forbidden" });
+      }
+      req.user = user;
+    })(req, res, next);
+
+    const filter = {};
+    if (req.query.tag) {
+      filter.tags = {
+        some: { name: { mode: "insensitive", equals: req.query.tag } },
+      };
     }
 
     const allPosts = await client.posts.findMany({
