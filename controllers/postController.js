@@ -102,27 +102,21 @@ exports.get_all_posts = async (req, res, next) => {
   }
 };
 
-// You can split this up into super / admin and author versions.
-// This would be the general reader route that only gets published posts
-// Then there'd be another route that can get both published and unpublished
-// But it would require the user to be an admin or author to use it at all.
-// Authors can only see their own posts, whereas admins can see everything.
-// For now, just change this to use postgres
-// for now, just leave it at super since author doesn't exist
-// returns both the likes count and the ids of the users who did the like
-exports.get_single_post = async (req, res, next) => {
+exports.get_single_published_post = async (req, res, next) => {
   try {
     passport.authenticate("jwt", { session: false }, (err, user) => {
       if (err) return next(err);
       req.user = user;
     })(req, res, next);
-    const filter = { id: Number(req.params.postId) };
-    if (!req.user && req.user.role !== "Super") {
-      filter.published = true;
-    }
+
     const post = await client.posts.findUnique({
-      where: filter,
+      where: { id: Number(req.params.postId), published: true },
       include: {
+        author: {
+          select: {
+            username: true,
+          },
+        },
         tags: true,
         _count: {
           select: {
@@ -131,7 +125,7 @@ exports.get_single_post = async (req, res, next) => {
         },
         likes: {
           where: {
-            id: req.user.id,
+            id: req.user.id || 0,
           },
           select: {
             id: true,
@@ -147,10 +141,32 @@ exports.get_single_post = async (req, res, next) => {
   }
 };
 
-// No author feature so only supers can create posts for now
+exports.get_single_authored_post = async (req, res, next) => {
+  try {
+    passport.authenticate("jwt", { session: false }, (err, user) => {
+      if (err || (user.role !== "Author" && user.role !== "Super")) {
+        return res.status(403).json({ err: "Forbidden" });
+      }
+      req.user = user;
+    })(req, res, next);
+
+    const post = await client.posts.findUnique({
+      where: { id: Number(req.params.postId) },
+      include: {
+        tags: true,
+      },
+    });
+    if (post) return res.json(post);
+    else return res.status(404).json("Not found");
+  } catch (err) {
+    console.log(err);
+    return next(err);
+  }
+};
+
 exports.create_post = [
   passport.authenticate("jwt", { session: false }),
-  middleware.checkIsAdmin,
+  middleware.checkIsAuthor,
   validation.postValidator(),
 
   async (req, res, next) => {
@@ -188,7 +204,7 @@ exports.create_post = [
 
 exports.edit_post = [
   passport.authenticate("jwt", { session: false }),
-  middleware.checkIsAdmin,
+  middleware.checkIsAuthor,
   validation.postValidator(),
   async (req, res, next) => {
     try {
@@ -233,13 +249,13 @@ exports.edit_post = [
 
 exports.delete_post = [
   passport.authenticate("jwt", { session: false }),
-  middleware.checkIsAdmin,
+  middleware.checkIsAuthor,
   async (req, res, next) => {
+    const filter = { id: Number(req.params.postId) };
+    if (req.user.role !== "Super") filter.authorId = req.user.id;
     try {
       await client.posts.delete({
-        where: {
-          id: Number(req.params.postId),
-        },
+        where: filter,
       });
       return res.json(true);
     } catch (err) {
