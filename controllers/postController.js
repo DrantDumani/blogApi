@@ -14,6 +14,9 @@ exports.get_all_published_posts = async (req, res, next) => {
     }
 
     const allPosts = await client.posts.findMany({
+      omit: {
+        content: true,
+      },
       where: filter,
       include: {
         tags: true,
@@ -49,6 +52,9 @@ exports.get_authored_posts = async (req, res, next) => {
     }
 
     const allPosts = await client.posts.findMany({
+      omit: {
+        content: true,
+      },
       where: filter,
       include: {
         tags: true,
@@ -84,6 +90,9 @@ exports.get_all_posts = async (req, res, next) => {
     }
 
     const allPosts = await client.posts.findMany({
+      omit: {
+        content: true,
+      },
       where: filter,
       include: {
         tags: true,
