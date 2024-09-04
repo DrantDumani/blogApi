@@ -91,7 +91,6 @@ exports.delete_comment = [
       const filterOpts = { where: { id: Number(req.params.commentId) } };
       if (req.user.role !== "Super") {
         filterOpts.where.authorId = req.user.id;
-        console.log(filterOpts);
       }
       const deleted = await client.comments.delete(filterOpts);
 

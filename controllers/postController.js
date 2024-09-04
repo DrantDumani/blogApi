@@ -274,68 +274,50 @@ exports.delete_post = [
   },
 ];
 
-// Likes and unlikes can stay as the same route for now, I guess
-// depending on how much trouble it is, I might split them up
-// that way, you don't have to do a 2nd query and can just do the action
-//
 exports.like_post = [
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
-      const post = await client.posts.findUnique({
+      await client.posts.update({
         where: {
           id: Number(req.params.postId),
         },
-        include: {
-          _count: {
-            select: {
-              likes: true,
-            },
-          },
+        data: {
           likes: {
-            where: {
+            connect: {
               id: req.user.id,
-            },
-
-            select: {
-              id: true,
             },
           },
         },
       });
 
-      const isPostLiked = post.likes.some((like) => req.user.id === like.id);
-
-      if (!isPostLiked) {
-        await client.posts.update({
-          where: {
-            id: Number(req.params.postId),
-          },
-          data: {
-            likes: {
-              connect: {
-                id: req.user.id,
-              },
-            },
-          },
-        });
-      } else {
-        await client.posts.update({
-          where: {
-            id: Number(req.params.postId),
-          },
-          data: {
-            likes: {
-              disconnect: {
-                id: req.user.id,
-              },
-            },
-          },
-        });
-      }
-
-      return res.json({ likedPost: isPostLiked });
+      return res.json({ msg: "Liked post" });
     } catch (err) {
+      console.error(err);
+      return next(err);
+    }
+  },
+];
+
+exports.unlike_post = [
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    try {
+      await client.posts.update({
+        where: {
+          id: Number(req.params.postId),
+        },
+        data: {
+          likes: {
+            disconnect: {
+              id: req.user.id,
+            },
+          },
+        },
+      });
+
+      return res.json({ msg: "Unliked post" });
+    } catch {
       console.error(err);
       return next(err);
     }

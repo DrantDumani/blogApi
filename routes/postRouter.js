@@ -9,8 +9,6 @@ router.get(
   postController.get_all_published_posts
 );
 
-// get all posts by a specific Author
-// verify user is author or super role
 router.get(
   "/writer_posts",
   validation.checkQueries,
@@ -30,5 +28,7 @@ router.delete("/:postId", postController.delete_post);
 router.get("/:postId", postController.get_single_published_post);
 
 router.put("/:postId/like", postController.like_post);
+
+router.put("/:postId/unlike", postController.unlike_post);
 
 module.exports = router;
