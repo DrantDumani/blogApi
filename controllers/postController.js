@@ -39,10 +39,12 @@ exports.get_authored_posts = async (req, res, next) => {
   try {
     passport.authenticate("jwt", { session: false }, (err, user) => {
       if (err || (user.role !== "Author" && user.role !== "Super")) {
-        return res.status(403).json({ err: "Forbidden" });
+        return;
       }
       req.user = user;
     })(req, res, next);
+
+    if (!req.user) return res.json({ err: "Forbidden" });
 
     const filter = { authorId: req.user.id };
     if (req.query.tag) {
@@ -66,7 +68,7 @@ exports.get_authored_posts = async (req, res, next) => {
       ],
     });
 
-    res.json({ posts: allPosts });
+    return res.json({ posts: allPosts });
   } catch (err) {
     console.error(err);
     return next(err);
@@ -77,10 +79,12 @@ exports.get_all_posts = async (req, res, next) => {
   try {
     passport.authenticate("jwt", { session: false }, (err, user) => {
       if (err || user.role !== "Super") {
-        return res.status(403).json({ err: "Forbidden" });
+        return;
       }
       req.user = user;
     })(req, res, next);
+
+    if (!req.user) return res.status(403).json({ err: "Forbidden" });
 
     const filter = {};
     if (req.query.tag) {
