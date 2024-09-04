@@ -1,7 +1,6 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const jwt_passport = require("passport-jwt");
-const User = require("./models/user");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 const client = require("./prisma/client");
@@ -11,7 +10,6 @@ const ExtractJwt = jwt_passport.ExtractJwt;
 
 const localVerify = async (email, password, done) => {
   try {
-    // const user = await User.findOne({ email: email }).exec();
     const user = await client.users.findUnique({ where: { email: email } });
     if (!user) return done(null, false);
 

@@ -1,5 +1,3 @@
-const Comment = require("../models/comment");
-const Post = require("../models/post");
 const passport = require("../passportConfig");
 const validation = require("../middleware/validationUtils");
 const { validationResult } = require("express-validator");
