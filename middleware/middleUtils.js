@@ -11,7 +11,14 @@ exports.checkLoggedIn = (req, res, next) => {
 };
 
 exports.checkIsAdmin = (req, res, next) => {
-  if (!req.user.isAdmin) return res.status(401).send("Forbidden");
+  if (req.user.role !== "Super") return res.status(401).send("Forbidden");
+  return next();
+};
+
+exports.checkIsAuthor = (req, res, next) => {
+  if (req.user.role !== "Super" && req.user.role !== "Author") {
+    return res.status(401).send("Forbidden");
+  }
   return next();
 };
 
@@ -27,7 +34,7 @@ exports.localUserAuth = (req, res, next) => {
 
 exports.localAdminAuth = (req, res, next) => {
   passport.authenticate("local", { session: false }, (err, user) => {
-    if (err || !user || !user.isAdmin) {
+    if (err || !user || (user.role !== "Author" && user.role !== "Super")) {
       return res.status(401).json({ err: "Invalid Credentials" });
     } else {
       utility.sign_jwt_token(req, res, user, next);
